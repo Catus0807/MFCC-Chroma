@@ -45,7 +45,7 @@ def chroma(signal, fs):
         return final_matrix / 1e-8
     return final_matrix / signal_energy
 
-def chroma_function(file_path, sr=16000, frame_length=0.025, hop_length=0.010, nfft=2048):
+def chroma_function(file_path, sr=44100, frame_length=0.025, hop_length=0.0125, nfft=1024):
     """
     Tính đặc trưng Chroma cho file âm thanh và trả về vector trung bình cùng ma trận Chroma.
     """
@@ -159,7 +159,7 @@ def test_chroma(file_path):
     """
     try:
         # Đọc tín hiệu âm thanh để kiểm tra
-        y, sr = librosa.load(file_path, sr=16000)
+        y, sr = librosa.load(file_path, sr=44100)
         plot_signal(y, sr)
 
         # Tính Chroma
@@ -172,7 +172,7 @@ def test_chroma(file_path):
         print("Vector Chroma trung bình (đã chuẩn hóa):", chroma_mean)
 
         # Vẽ heatmap Chroma (dùng bản đã chuẩn hóa để tăng độ tương phản)
-        plot_chroma_heatmap(chroma_features_normalized, hop_length=0.010, sr=16000)
+        plot_chroma_heatmap(chroma_features_normalized, hop_length=0.0125, sr=44100)
 
         # Vẽ biểu đồ cột cho vector Chroma trung bình
         plot_chroma_mean(chroma_mean)

@@ -11,7 +11,6 @@ def triangular_filter_bank(fs, nfft, lowfreq=133.33, linc=200/3, logsc=1.0711703
     Triangular filterbank for MFCC computation, adjusted for rfft (nfft//2 + 1 bins).
     lin_filt = No. of linear filters
     log_filt = No. of log filters
-
     """
     num_filts = lin_filt + log_filt
 
@@ -50,7 +49,6 @@ def triangular_filter_bank(fs, nfft, lowfreq=133.33, linc=200/3, logsc=1.0711703
 def compute_mfcc(fft_magnitude, fbank, num_mfcc_feats):
     """
     Returns the MFCCs of a signal frame.
-
     """
     mspec = np.log10(np.dot(fft_magnitude, fbank.T) + 1e-8)
     ceps = dct(mspec, type=2, norm="ortho", axis=-1)[:num_mfcc_feats]
@@ -59,21 +57,20 @@ def compute_mfcc(fft_magnitude, fbank, num_mfcc_feats):
 def get_mfcc(fs, nfft, n_mfcc_feats, signal):
     """
     Returns mfcc features for a signal.
-
     """
     [fbank, freqs] = triangular_filter_bank(fs, nfft)
     feature = compute_mfcc(signal, fbank, n_mfcc_feats)
     return feature
 
-def mfcc_function(file_path, sr=16000, frame_length=0.025, hop_length=0.010, n_mfcc=13, nfft=2048):
+def mfcc_function(file_path, sr=44100, frame_length=0.025, hop_length=0.0125, n_mfcc=13, nfft=1024):
     # Đọc tín hiệu âm thanh
     y, sr = librosa.load(file_path, sr=sr)
     duration = len(y) / sr
     print(f"File âm thanh: {duration:.2f} giây, số mẫu: {len(y)}")
 
     # Chia khung
-    frame_length_samples = int(frame_length * sr)
-    hop_length_samples = int(hop_length * sr)
+    frame_length_samples = int(frame_length * sr)  # 1024 mẫu
+    hop_length_samples = int(hop_length * sr)     # 512 mẫu
     frames = librosa.util.frame(y, frame_length=frame_length_samples, hop_length=hop_length_samples).T.copy()
     num_frames = frames.shape[0]
     print(f"Số khung: {num_frames}")
@@ -123,10 +120,10 @@ def mfcc_function(file_path, sr=16000, frame_length=0.025, hop_length=0.010, n_m
     # Chuyển vị ma trận
     return mfcc_mean_normalized, mfcc_features_normalized.T, mfcc_features_normalized.T
 
+# Hàm vẽ heatmap MFCC
 def plot_mfcc_heatmap(mfcc_features, hop_length, sr, title="Hình. Minh họa MFCCs"):
     """
     Vẽ heatmap MFCC trên tất cả các khung.
-
     """
     plt.figure(figsize=(10, 4))
     plt.imshow(mfcc_features, aspect='auto', origin='lower', cmap='jet', interpolation='nearest')
@@ -149,7 +146,6 @@ def plot_mfcc_heatmap(mfcc_features, hop_length, sr, title="Hình. Minh họa MF
 def plot_mfcc_mean(mfcc_mean, title="Biểu đồ Vector MFCC Trung bình"):
     """
     Vẽ biểu đồ cột cho vector MFCC trung bình (13 chiều).
-
     """
     plt.figure(figsize=(8, 4))
     plt.bar(range(len(mfcc_mean)), mfcc_mean, color='skyblue')
@@ -177,14 +173,13 @@ def plot_signal(y, sr, title="Tín hiệu âm thanh"):
 def test_mfcc(file_path):
     """
     Hàm test MFCC với một file âm thanh.
-    
     """
     try:
         # Đọc tín hiệu âm thanh để kiểm tra
-        y, sr = librosa.load(file_path, sr=16000)
+        y, sr = librosa.load(file_path, sr=44100)
         plot_signal(y, sr)
 
-         # Tính MFCC
+        # Tính MFCC
         mfcc_mean, mfcc_features, mfcc_features_normalized = mfcc_function(file_path)
 
         # Kiểm tra giá trị
@@ -194,7 +189,7 @@ def test_mfcc(file_path):
         print("Vector MFCC trung bình (đã chuẩn hóa):", mfcc_mean)
 
         # Vẽ heatmap MFCC (dùng bản đã chuẩn hóa để tăng độ tương phản)
-        plot_mfcc_heatmap(mfcc_features_normalized, hop_length=0.010, sr=16000)
+        plot_mfcc_heatmap(mfcc_features_normalized, hop_length=0.0125, sr=44100)
 
         # Vẽ biểu đồ cột cho vector MFCC trung bình
         plot_mfcc_mean(mfcc_mean)
